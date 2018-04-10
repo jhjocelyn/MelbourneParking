@@ -1,0 +1,117 @@
+<% include partials/header %>
+    <div id="parent">
+        <div id="map"></div>
+        <div id="button" class="container">
+            <button id="refreshBtn" type="button" class="btn btn-primary btn-lg">Refresh</button>
+        </div>
+    </div>
+    <script>
+    var map;
+    var currentLat = "";
+    var currentLng = "";
+    var circle = 1000;
+
+    var realUrl = "https://data.melbourne.vic.gov.au/resource/dtpv-d4pf.json?$where=within_circle(location," + currentLat + "," + currentLng + "," + circle + ")";
+
+    //get user's current data
+    function getCurrentLocation() {
+        // function locationReceiverd(postion){
+        //     console.log(position);
+        // }
+        // function locationError(error){
+        //     console.log(error);
+        // }
+
+        // if(navigator.geolocation){
+        //     navigator.geolocation.getCurrentPosition(locationReceiverd,locationError,{timeout:1});
+        // }
+    }
+
+
+    function predict(){
+        $.ajaxt({
+            url:"",
+            type:"GET",
+            dataType:"json"
+            data{
+                "time:",
+                "lat":,
+                "lon":
+            },
+            error: function(){
+
+            }
+        }).done(function(result)){
+
+        }
+    }
+
+
+    // var red = "/images/red.png";
+    // var blue = "/images/blue.png";
+    // get data from victoria government open data
+    function getData() {
+        $.ajax({
+            url: "https://data.melbourne.vic.gov.au/resource/dtpv-d4pf.json",
+            type: "GET",
+            data: {
+                "$limit": 5000,
+                "$$app_token": "DJcK54lIRE8FfTPGASaefCAbe"
+            }
+        }).done(function(data) {
+            alert("Retrieved " + data.length + " records from the dataset!");
+            data.forEach(function(bay) {
+                var bayLat = bay.lat;
+                var bayLng = bay.lon;
+                var bayStatus = bay.status;
+                var latLng = new google.maps.LatLng(bayLat, bayLng);
+                var red = {
+                    url: '/images/red.png',
+                    scaledSize: new google.maps.Size(40, 40), // scaled size
+                    origin: new google.maps.Point(0, 0), // origin
+                    anchor: new google.maps.Point(0, 0) // anchor
+                };
+
+                var blue = {
+                    url: '/images/blue.png',
+                    scaledSize: new google.maps.Size(40, 40), // scaled size
+                    origin: new google.maps.Point(0, 0), // origin
+                    anchor: new google.maps.Point(0, 0) // anchor
+                };
+
+                if (bayStatus == "Unoccupied") {
+                    var marker = new google.maps.Marker({
+                        position: latLng,
+                        map: map,
+                        icon: blue
+                    });
+                }
+                if (bayStatus == "Present") {
+                    var marker = new google.maps.Marker({
+                        position: latLng,
+                        map: map,
+                        icon: red
+                    });
+                }
+            });
+        });
+    }
+
+
+    // map initialization
+    function initMap() {
+        var melbourneCity = { lat: -37.813628, lng: 144.963058 };
+        map = new google.maps.Map(document.getElementById('map'), {
+            center: melbourneCity,
+            zoom: 14,
+            mapTypeId: google.maps.MapTypeId.ROADMAP
+        });
+        $(document).ready(function() {
+            //离开了ajax函数，data不能被传递给一个var，不能被调用。想不明白这一点。
+            $("#refreshBtn").on("click", function() {
+                getData();
+            })
+        });
+    }
+    </script>
+    <% include partials/footer %>
