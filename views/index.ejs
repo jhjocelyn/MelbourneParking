@@ -1,5 +1,8 @@
 <% include partials/header %>
+
+
     <div id="parent">
+
         <div id="map"></div>
         <div id="button" class="container">
             <button id="refreshBtn" type="button" class="btn btn-primary btn-lg">Refresh</button>
@@ -7,52 +10,21 @@
     </div>
     <script>
     var map;
-    var currentLat = "";
-    var currentLng = "";
-    var circle = 1000;
-
+    var currentLat = <%= desLat%>;
+    var currentLng = <%= desLng%>;
+    var circle = 200;
     var realUrl = "https://data.melbourne.vic.gov.au/resource/dtpv-d4pf.json?$where=within_circle(location," + currentLat + "," + currentLng + "," + circle + ")";
+    // url: "https://data.melbourne.vic.gov.au/resource/dtpv-d4pf.json$",
 
-    //get user's current data
-    function getCurrentLocation() {
-        // function locationReceiverd(postion){
-        //     console.log(position);
-        // }
-        // function locationError(error){
-        //     console.log(error);
-        // }
-
-        // if(navigator.geolocation){
-        //     navigator.geolocation.getCurrentPosition(locationReceiverd,locationError,{timeout:1});
-        // }
-    }
-
-
-    function predict(){
-        $.ajaxt({
-            url:"",
-            type:"GET",
-            dataType:"json"
-            data{
-                "time:",
-                "lat":,
-                "lon":
-            },
-            error: function(){
-
-            }
-        }).done(function(result)){
-
-        }
-    }
 
 
     // var red = "/images/red.png";
     // var blue = "/images/blue.png";
     // get data from victoria government open data
+
     function getData() {
         $.ajax({
-            url: "https://data.melbourne.vic.gov.au/resource/dtpv-d4pf.json",
+            url: realUrl,
             type: "GET",
             data: {
                 "$limit": 5000,
@@ -100,12 +72,20 @@
 
     // map initialization
     function initMap() {
-        var melbourneCity = { lat: -37.813628, lng: 144.963058 };
+        getData();
+        var melbourneCity = { lat: currentLat, lng: currentLng };
         map = new google.maps.Map(document.getElementById('map'), {
             center: melbourneCity,
-            zoom: 14,
+            zoom: 18,
             mapTypeId: google.maps.MapTypeId.ROADMAP
         });
+
+        map.addListener('bounds_changed',function(){
+
+        })
+
+
+
         $(document).ready(function() {
             //离开了ajax函数，data不能被传递给一个var，不能被调用。想不明白这一点。
             $("#refreshBtn").on("click", function() {
@@ -114,4 +94,8 @@
         });
     }
     </script>
+    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBvCUI7YSVemf3TbnNvc1MTnw1lK0dKQyY&callback=initMap" async defer>
+    </script>
     <% include partials/footer %>
+
+

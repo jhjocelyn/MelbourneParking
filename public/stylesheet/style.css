@@ -1,3 +1,4 @@
+
 html,
 body {
     width: 100%;
@@ -5,7 +6,10 @@ body {
     margin: 0;
     padding: 0;
 }
-
+::placeholder { /* Chrome, Firefox, Opera, Safari 10.1+ */
+    color: white;
+    opacity: 0.7;
+}
 #parent {
     width: 100%;
     height: 100%;
@@ -22,5 +26,67 @@ div#button {
     z-index: 10;
     left: 43%;
     bottom: 15%;
-
 }
+
+
+/* home style */
+
+div#home {
+    width: 100%;
+    height: 100%;
+    margin: 0;
+    padding: 0;
+    background-image: url("../images/bg.jpeg");
+    background-repeat: no-repeat;
+    background-size: cover;
+    position: relative;
+}
+
+div.locationField {
+    position: absolute;
+    left: 35%;
+    top: 55%;
+}
+
+input.search_box {
+    width: 300px;
+    height: 55px;
+    border: none;
+    background: none;
+    border-bottom: 3px solid white;
+    outline: none;
+}
+
+
+p.header {
+    color: white;
+    font-size: 40px;
+    text-align: center;
+    font-weight: bold;
+}
+
+div.header {
+    margin: 7% auto;
+}
+
+footer.home {
+    position: fixed;
+    bottom: 0;
+    height: 40px;
+    width: 100%;
+    background-color: black;
+    opacity: 0.87;
+}
+
+footer p#footer{
+    line-height: 40px;
+    text-align: center;
+    color: gray;
+}
+
+
+
+
+
+
+

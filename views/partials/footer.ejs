@@ -1,8 +1,29 @@
-    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBvCUI7YSVemf3TbnNvc1MTnw1lK0dKQyY&callback=initMap" async defer>
-    </script>
+
     <!-- jquery and bootstrap js -->
-
     <script src="/js/bootstrap.min.js"></script>
-    </body>
+    <script>
+        var str = "On-Street Parking Lots @ Melbourne City";
+        var container = $("#headers");
+        var index = 0;
+        var tId = null;
 
+        function start(){
+            container.text('');
+
+            tId = setInterval(type,200);
+        }
+
+        function type(){
+            container.append(str.charAt(index));
+            if(index++ == str.length){
+                clearInterval(tId);
+                index = 0;
+                start();
+            }
+        }
+
+        start();
+    </script>
+
+    </body>
 </html>

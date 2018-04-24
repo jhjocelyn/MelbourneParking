@@ -1,0 +1,79 @@
+<% include partials/header %>
+
+
+<div id="home" class="container">
+
+
+    <div class="container header">
+        <p id="headers" class="header"></p>
+    </div>
+
+
+
+    <div class="locationField" class="container">
+        <i class="ui search icon huge inverted"></i>
+        <input id="autocomplete" class="search_box" style="font-size: 30px;color:white" type="text" name="destination">
+    </div>
+    <footer class="footer home">
+    <div class="container">
+        <p id="footer">&copy 2018 COPYRITH BY HUI JIANG </p>
+    </div>
+</footer>
+
+</div>
+
+
+<script>
+    var placeSearch, autocomplete, geocoder,lat,lng;
+
+    function initAutocomplete() {
+      geocoder = new google.maps.Geocoder();
+      autocomplete = new google.maps.places.Autocomplete(
+        (document.getElementById('autocomplete')), {
+          types: ['geocode']
+        });
+
+      autocomplete.addListener('place_changed', fillInAddress);
+    }
+
+    function codeAddress(address) {
+      geocoder.geocode({
+        'address': address
+      }, function(results, status) {
+        if (status == 'OK') {
+          // This is the lat and lng results[0].geometry.location
+         lat =  results[0].geometry.location.lat();
+         lng =  results[0].geometry.location.lng();
+         window.location.href = `/parking?lat=${lat}&lng=${lng}`;
+        } else {
+          alert('Geocode was not successful for the following reason: ' + status);
+        }
+      });
+}
+
+    function fillInAddress() {
+      var place = autocomplete.getPlace();
+      codeAddress(document.getElementById('autocomplete').value);
+    }
+
+</script>
+
+
+<script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBvCUI7YSVemf3TbnNvc1MTnw1lK0dKQyY&libraries=places&callback=initAutocomplete" async defer></script>
+
+
+
+<% include partials/footer %>
+
+
+
+
+
+
+
+
+
+
+
+
+
