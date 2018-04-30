@@ -33,6 +33,7 @@
         }).done(function(data) {
             alert("Retrieved " + data.length + " records from the dataset!");
             data.forEach(function(bay) {
+                var bayId  = bay.bay_id;
                 var bayLat = bay.lat;
                 var bayLng = bay.lon;
                 var bayStatus = bay.status;
@@ -57,12 +58,19 @@
                         map: map,
                         icon: blue
                     });
+                    marker.addListener('click',function(){
+                        window.location.href=`/data/${bayId}`;
+                    });
                 }
+
                 if (bayStatus == "Present") {
                     var marker = new google.maps.Marker({
                         position: latLng,
                         map: map,
                         icon: red
+                    });
+                    marker.addListener('click',function(){
+                        window.location.href=`/data/${bayId}`;
                     });
                 }
             });
@@ -76,15 +84,9 @@
         var melbourneCity = { lat: currentLat, lng: currentLng };
         map = new google.maps.Map(document.getElementById('map'), {
             center: melbourneCity,
-            zoom: 18,
+            zoom: 17,
             mapTypeId: google.maps.MapTypeId.ROADMAP
         });
-
-        map.addListener('bounds_changed',function(){
-
-        })
-
-
 
         $(document).ready(function() {
             //离开了ajax函数，data不能被传递给一个var，不能被调用。想不明白这一点。

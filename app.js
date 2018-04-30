@@ -4,18 +4,23 @@
     @Melbourne
 */
 
-var express = require("express");
-var bodyParser = require("body-parser");
-var app = express();
+var express         = require("express");
+var bodyParser      = require("body-parser");
+var mongoose        = require("mongoose");
+var bay             = require("./models/bay");
+var lastWeekData    = require("./testdb");
+var app             = express();
+mongoose.connect("mongodb://localhost/parking");
+
 
 
 app.use(bodyParser.urlencoded({extended:true}));
-app.use(express.static("public") );
+app.use(express.static(__dirname +'/public'));
 app.set("view engine","ejs");
 
 //ROOT --- HOME PAGE
 app.get("/",function(req,res){
-    res.render("home");
+    res.render("data");
 });
 
 //SHOW --- CURRENT PARKING SPACE
@@ -26,7 +31,7 @@ app.get("/parking",function(req,res){
 });
 
 //SHOW --- DATA VISUALIZATION
-app.get("/parking/data",function(req,res){
+app.get("/data/:id",function(req,res){
 
 });
 
