@@ -7,8 +7,8 @@
 var express         = require("express");
 var bodyParser      = require("body-parser");
 var mongoose        = require("mongoose");
-var bay             = require("./models/bay");
-var lastWeekData    = require("./testdb");
+var Bay             = require("./models/bay");
+// var lastWeekData    = require("./test");
 var app             = express();
 mongoose.connect("mongodb://localhost/parking");
 
@@ -20,10 +20,10 @@ app.set("view engine","ejs");
 
 //ROOT --- HOME PAGE
 app.get("/",function(req,res){
-    res.render("data");
+    res.render("home");
 });
 
-//SHOW --- CURRENT PARKING SPACE
+//
 app.get("/parking",function(req,res){
     var lat = req.query.lat;
     var lng = req.query.lng;
@@ -32,8 +32,20 @@ app.get("/parking",function(req,res){
 
 //SHOW --- DATA VISUALIZATION
 app.get("/data/:id",function(req,res){
+    var streetMarker = req.query.streetMarker;
+    var id = req.params.id;
+    Bay.findOne({"bayId":id},'prob',function(err,bay){
+        if (err) return handleError(err);
+        res.render("data",{days:bay.prob,streetMarker:streetMarker});
+    });
 
 });
+
+// marker-bayid-info
+// app.get("/parking/:id",function(req,res){
+
+//     res.render("index",{})
+// })
 
 
 //START LOCAL SEVER

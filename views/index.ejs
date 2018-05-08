@@ -8,6 +8,8 @@
             <button id="refreshBtn" type="button" class="btn btn-primary btn-lg">Refresh</button>
         </div>
     </div>
+
+
     <script>
     var map;
     var currentLat = <%= desLat%>;
@@ -21,6 +23,13 @@
     // var red = "/images/red.png";
     // var blue = "/images/blue.png";
     // get data from victoria government open data
+    function getInfo(){
+        $.ajax({
+            url: "/"
+        }).done(function(data){
+
+        })
+    }
 
     function getData() {
         $.ajax({
@@ -31,8 +40,9 @@
                 "$$app_token": "DJcK54lIRE8FfTPGASaefCAbe"
             }
         }).done(function(data) {
-            alert("Retrieved " + data.length + " records from the dataset!");
+            //alert("Retrieved " + data.length + " records from the dataset!");
             data.forEach(function(bay) {
+                var streetMarker = bay.st_marker_id;
                 var bayId  = bay.bay_id;
                 var bayLat = bay.lat;
                 var bayLng = bay.lon;
@@ -44,6 +54,16 @@
                     origin: new google.maps.Point(0, 0), // origin
                     anchor: new google.maps.Point(0, 0) // anchor
                 };
+
+                var contentString = '<div id="content">'+
+                            '<h6>1P MTR M-SAT 7:30-18:30</h6>'+
+                            '</div>';
+
+
+                var infowindow = new google.maps.InfoWindow({
+                            content:contentString
+                        });
+
 
                 var blue = {
                     url: '/images/blue.png',
@@ -58,9 +78,21 @@
                         map: map,
                         icon: blue
                     });
-                    marker.addListener('click',function(){
-                        window.location.href=`/data/${bayId}`;
+
+                    marker.addListener("mouseover",function(){
+                        aler(bayId);
+
+                        infowindow.open(map,marker);
                     });
+
+                    marker.addListener('mouseout',function(){
+                        infowindow.close();
+                    });
+
+                    marker.addListener('click',function(){
+                        window.location.href=`/data/${bayId}?streetMarker=${streetMarker}`;
+                    });
+
                 }
 
                 if (bayStatus == "Present") {
@@ -69,9 +101,18 @@
                         map: map,
                         icon: red
                     });
-                    marker.addListener('click',function(){
-                        window.location.href=`/data/${bayId}`;
+                    marker.addListener('mouseover',function(){
+                        infowindow.open(map,marker);
                     });
+                    marker.addListener('mouseout',function(){
+                        infowindow.close();
+                    });
+
+                    marker.addListener('click',function(){
+                        window.location.href=`/data/${bayId}?streetMarker=${streetMarker}`;
+                    });
+
+
                 }
             });
         });
@@ -80,6 +121,7 @@
 
     // map initialization
     function initMap() {
+
         getData();
         var melbourneCity = { lat: currentLat, lng: currentLng };
         map = new google.maps.Map(document.getElementById('map'), {
@@ -99,5 +141,28 @@
     <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBvCUI7YSVemf3TbnNvc1MTnw1lK0dKQyY&callback=initMap" async defer>
     </script>
     <% include partials/footer %>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 

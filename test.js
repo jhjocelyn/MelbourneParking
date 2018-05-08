@@ -7,6 +7,10 @@ const mysql = require("mysql");
 const mongoose = require("mongoose");
 var dbBay = require("./models/bay");
 
+
+
+
+
 var bays = []; // an array of objects
 var ids = []; // an array of ids
 
@@ -14,6 +18,7 @@ var ids = []; // an array of ids
 function Bay(id) {
     this.bayId = id;
     this.prob = [0, 0, 0, 0, 0, 0, 0];
+    this.desc=[];
 }
 
 
@@ -71,7 +76,7 @@ function calculate(array) {
     }
 
     for (var id in hash) {
-        hash[id] = (occupied[id] / hash[id]);
+        hash[id] = Math.round((occupied[id] / hash[id])*100);
         //csvStream.write({ bayId: id, occupiedRate: hash[id] });
     }
     return hash;
@@ -148,7 +153,6 @@ function formatBayRate(record, dayOfWeek, callback) {
 
 
 main();
-
 
 
 
