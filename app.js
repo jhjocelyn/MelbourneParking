@@ -3,16 +3,14 @@
     date: 08 March 2018
     @Melbourne
 */
-
 var express         = require("express");
 var bodyParser      = require("body-parser");
 var mongoose        = require("mongoose");
 var Bay             = require("./models/bay");
 // var lastWeekData    = require("./test");
+var https           = require("https");
 var app             = express();
 mongoose.connect("mongodb://localhost/parking");
-
-
 
 app.use(bodyParser.urlencoded({extended:true}));
 app.use(express.static(__dirname +'/public'));
@@ -38,8 +36,8 @@ app.get("/data/:id",function(req,res){
         if (err) return handleError(err);
         res.render("data",{days:bay.prob,streetMarker:streetMarker});
     });
-
 });
+
 
 // marker-bayid-info
 // app.get("/parking/:id",function(req,res){
@@ -55,6 +53,7 @@ app.listen(8888,'localhost',function(){
 
 //UNCOMMENT IT IN THE FUTURE
 // app.listen(process.env.PORT,process.env.IP);
+
 
 
 

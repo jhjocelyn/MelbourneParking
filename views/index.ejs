@@ -1,39 +1,158 @@
 <% include partials/header %>
-
+<script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBvCUI7YSVemf3TbnNvc1MTnw1lK0dKQyY&callback=initMap" async defer>
+</script>
 
     <div id="parent">
-
         <div id="map"></div>
         <div id="button" class="container">
-            <button id="refreshBtn" type="button" class="btn btn-primary btn-lg">Refresh</button>
+            <button id="refreshBtn" type="button" class="btn btn-primary btn-md">Refresh</button>
+            <button id="recommendBtn" type="button" class="btn btn-primary btn-md">Recommed</button>
         </div>
     </div>
 
-
     <script>
     var map;
+    var markers = [];
     var currentLat = <%= desLat%>;
     var currentLng = <%= desLng%>;
     var circle = 200;
+    var today = new Date();
     var realUrl = "https://data.melbourne.vic.gov.au/resource/dtpv-d4pf.json?$where=within_circle(location," + currentLat + "," + currentLng + "," + circle + ")";
     // url: "https://data.melbourne.vic.gov.au/resource/dtpv-d4pf.json$",
 
+    //STEP0 - GET CURRENT LOCATION
+    function getLocation(){
+        if (navigator.geolocation) {
+            navigator.geolocation.getCurrentPosition(function(position) {
+                var pos = {
+                        lat: position.coords.latitude,
+                        lng: position.coords.longitude
+                    }
+                getTime(pos.lat,pos.lng);
+                console.log("origins: "+pos.lat+" "+pos.lng);
+                console.log("destinations: "+currentLat+" "+currentLng);
+            });
+        }else{
+           alert("h5 geolocation is not supported");
+        }
+    }
+
+    //STEP1 - GET TIME
+    function getTime(lat,lng){
+        console.log("from getTime: "+lat+" "+lng);
+        var hour = today.getHours();
+        var minutes = today.getMinutes();
+        var origin = new google.maps.LatLng(lat,lng);
+        var destination = new google.maps.LatLng(currentLat,currentLng);
+        var service = new google.maps.DistanceMatrixService();
+        service.getDistanceMatrix(
+            {
+                origins: [origin],
+                destinations: [destination],
+                travelMode: 'DRIVING',
+                avoidHighways: true,
+                avoidTolls: true,
+            }, callback);
+
+        function callback(data,status){
+            // console.log(status);
+            // console.log(data);
+            if(status !== "OK"){
+                alert('Error was: ' + status);
+            }else{
+                var timeText = data.rows[0].elements[0].duration.text;
+                var timeSeconds = data.rows[0].elements[0].duration.value;
+                if(timeSeconds<=3600){
+                    var hr =0;
+                    var min = Math.round(timeSeconds/60);
+                }else{
+                    var hr = Math.floor(timeSeconds/3600);
+                    var remains = timeSeconds%3600;
+                    var min = Math.round(remains/60);
+                }
+                console.log("hours: "+hr);
+                console.log("minutes: "+min);
+                getStreetMarkers(hr,min);
+            }
+        }
+    }
 
 
-    // var red = "/images/red.png";
-    // var blue = "/images/blue.png";
-    // get data from victoria government open data
-    function getInfo(){
+    //STEP2 - GET SRTEETMARKERS
+    function getStreetMarkers(hour,minute){
         $.ajax({
-            url: "/"
+            url:"https://data.melbourne.vic.gov.au/resource/dtpv-d4pf.json?$where=within_circle(location," + currentLat + "," + currentLng + "," + 500 + ")",
+            type: "GET",
+            data: {
+                "$limit": 5000,
+                "$$app_token": "DJcK54lIRE8FfTPGASaefCAbe"
+            }
         }).done(function(data){
+            console.log("Number of bays: "+data.length);
+            getRec(data,hour,minute);
 
+
+
+        });
+    }
+
+    //STEP3 - GET RECOMMENDED BAYS AND DISPLAY IT
+    function getRec(data,period_h,period_m){
+        var baylist = [];
+        for(let i=0;i<data.length;i++){
+            var streetMarker = data[i].st_marker_id;
+            baylist.push(streetMarker);
+        }
+        baylist = JSON.stringify(baylist);
+        console.log(typeof baylist);
+        console.log(baylist);
+        $.ajax({
+            url: "http://115.146.95.41:8000/parkdata/suggestbays",
+            type:"POST",
+            data:{
+                "baylist":baylist,
+                "period_h":period_h,
+                "period_m":period_m
+            }
+        }).done(function(res){
+            console.log(res.sortedstreetmarkers);
+            res.sortedstreetmarkers.forEach(function(sm){
+                data.forEach(function(bay){
+                        var streetMarker = bay.st_marker_id;
+                    var bayId  = bay.bay_id;
+                    var bayStatus = bay.status;
+                    var latLng = new google.maps.LatLng(bay.lat, bay.lon);
+                    var red = {
+                            url: '/images/red.png',
+                            scaledSize: new google.maps.Size(40, 40), // scaled size
+                            origin: new google.maps.Point(0, 0), // origin
+                            anchor: new google.maps.Point(0, 0) // anchor
+                        };
+                        var blue = {
+                            url: '/images/blue.png',
+                            scaledSize: new google.maps.Size(40, 40), // scaled size
+                            origin: new google.maps.Point(0, 0), // origin
+                            anchor: new google.maps.Point(0, 0) // anchor
+                        };
+                        if(sm === bay.st_marker_id){
+                            if(bayStatus === "Present"){
+                                addMarker(latLng,blue,bayId,streetMarker);
+                            }else{
+                                addMarker(latLng,red,bayId,streetMarker);
+                            }
+                        }
+                })
+            })
         })
     }
 
-    function getData() {
+
+
+
+    //get data from victoria government open data
+    function getData(url) {
         $.ajax({
-            url: realUrl,
+            url: url,
             type: "GET",
             data: {
                 "$limit": 5000,
@@ -48,23 +167,13 @@
                 var bayLng = bay.lon;
                 var bayStatus = bay.status;
                 var latLng = new google.maps.LatLng(bayLat, bayLng);
+                //red-blue
                 var red = {
                     url: '/images/red.png',
                     scaledSize: new google.maps.Size(40, 40), // scaled size
                     origin: new google.maps.Point(0, 0), // origin
                     anchor: new google.maps.Point(0, 0) // anchor
                 };
-
-                var contentString = '<div id="content">'+
-                            '<h6>1P MTR M-SAT 7:30-18:30</h6>'+
-                            '</div>';
-
-
-                var infowindow = new google.maps.InfoWindow({
-                            content:contentString
-                        });
-
-
                 var blue = {
                     url: '/images/blue.png',
                     scaledSize: new google.maps.Size(40, 40), // scaled size
@@ -73,56 +182,51 @@
                 };
 
                 if (bayStatus == "Unoccupied") {
-                    var marker = new google.maps.Marker({
-                        position: latLng,
-                        map: map,
-                        icon: blue
-                    });
-
-                    marker.addListener("mouseover",function(){
-                        aler(bayId);
-
-                        infowindow.open(map,marker);
-                    });
-
-                    marker.addListener('mouseout',function(){
-                        infowindow.close();
-                    });
-
-                    marker.addListener('click',function(){
-                        window.location.href=`/data/${bayId}?streetMarker=${streetMarker}`;
-                    });
-
+                    addMarker(latLng,blue,bayId,streetMarker);
                 }
 
                 if (bayStatus == "Present") {
-                    var marker = new google.maps.Marker({
-                        position: latLng,
-                        map: map,
-                        icon: red
-                    });
-                    marker.addListener('mouseover',function(){
-                        infowindow.open(map,marker);
-                    });
-                    marker.addListener('mouseout',function(){
-                        infowindow.close();
-                    });
-
-                    marker.addListener('click',function(){
-                        window.location.href=`/data/${bayId}?streetMarker=${streetMarker}`;
-                    });
-
-
+                    addMarker(latLng,red,bayId,streetMarker);
                 }
             });
         });
     }
 
+    function addMarker(location,color,bayId,streetMarker) {
+        var marker = new google.maps.Marker({
+          position: location,
+          map: map,
+          icon: color
+        });
+
+        marker.addListener('click',function(){
+                window.location.href=`/data/${bayId}?streetMarker=${streetMarker}`;
+        });
+        markers.push(marker);
+    }
+
+    function setMapOnAll(map) {
+        for (var i = 0; i < markers.length; i++) {
+          markers[i].setMap(map);
+        }
+    }
+
+    function clearMarkers() {
+        setMapOnAll(null);
+    }
+
+    // Deletes all markers in the array by removing references to them.
+    function deleteMarkers() {
+        clearMarkers();
+        markers = [];
+    }
 
     // map initialization
     function initMap() {
 
-        getData();
+        getData(realUrl);
+
+
         var melbourneCity = { lat: currentLat, lng: currentLng };
         map = new google.maps.Map(document.getElementById('map'), {
             center: melbourneCity,
@@ -131,18 +235,26 @@
         });
 
         $(document).ready(function() {
-            //离开了ajax函数，data不能被传递给一个var，不能被调用。想不明白这一点。
             $("#refreshBtn").on("click", function() {
-                getData();
-            })
+                    getData();
+            });
+
+            $("#recommendBtn").on("click",function(){
+                deleteMarkers();
+                getLocation();
+                map.setZoom(15);
+            });
         });
     }
-    </script>
-    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBvCUI7YSVemf3TbnNvc1MTnw1lK0dKQyY&callback=initMap" async defer>
-    </script>
-    <% include partials/footer %>
 
 
+
+
+</script>
+
+
+
+<% include partials/footer %>
 
 
 
