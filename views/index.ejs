@@ -7,10 +7,11 @@
         <div id="button" class="container">
             <button id="refreshBtn" type="button" class="btn btn-primary btn-md">Refresh</button>
             <button id="recommendBtn" type="button" class="btn btn-primary btn-md">Recommed</button>
+            <button id="homepageBtn" type="button" class="btn btn-primary btn-md">Search</button>
         </div>
     </div>
 
-    <script>
+<script>
     var map;
     var markers = [];
     var currentLat = <%= desLat%>;
@@ -18,7 +19,7 @@
     var circle = 200;
     var today = new Date();
     var realUrl = "https://data.melbourne.vic.gov.au/resource/dtpv-d4pf.json?$where=within_circle(location," + currentLat + "," + currentLng + "," + circle + ")";
-    // url: "https://data.melbourne.vic.gov.au/resource/dtpv-d4pf.json$",
+
 
     //STEP0 - GET CURRENT LOCATION
     function getLocation(){
@@ -118,7 +119,7 @@
             console.log(res.sortedstreetmarkers);
             res.sortedstreetmarkers.forEach(function(sm){
                 data.forEach(function(bay){
-                        var streetMarker = bay.st_marker_id;
+                    var streetMarker = bay.st_marker_id;
                     var bayId  = bay.bay_id;
                     var bayStatus = bay.status;
                     var latLng = new google.maps.LatLng(bay.lat, bay.lon);
@@ -134,22 +135,21 @@
                             origin: new google.maps.Point(0, 0), // origin
                             anchor: new google.maps.Point(0, 0) // anchor
                         };
+
                         if(sm === bay.st_marker_id){
                             if(bayStatus === "Present"){
-                                addMarker(latLng,blue,bayId,streetMarker);
-                            }else{
                                 addMarker(latLng,red,bayId,streetMarker);
+                            }else{
+                                addMarker(latLng,blue,bayId,streetMarker);
                             }
                         }
+                        map.setCenter(markers[0]);
                 })
             })
         })
     }
 
-
-
-
-    //get data from victoria government open data
+    //STEP 0: GET REAL-TIME DATA FROM VICTORIA GOVERNMENT OPEN DATABASE
     function getData(url) {
         $.ajax({
             url: url,
@@ -192,6 +192,7 @@
         });
     }
 
+    // ADD NEW MARKERS TO THE MAP
     function addMarker(location,color,bayId,streetMarker) {
         var marker = new google.maps.Marker({
           position: location,
@@ -205,25 +206,28 @@
         markers.push(marker);
     }
 
+    // DISPALYING ALL THE MARKERS
     function setMapOnAll(map) {
         for (var i = 0; i < markers.length; i++) {
           markers[i].setMap(map);
         }
     }
 
+    // CLAERING ALL THE MARKERS FROM THE MAP
     function clearMarkers() {
         setMapOnAll(null);
     }
 
-    // Deletes all markers in the array by removing references to them.
+    // DELETING ALL THE MARKERS
     function deleteMarkers() {
         clearMarkers();
         markers = [];
     }
 
-    // map initialization
+    // MAP INITIALIZATION
     function initMap() {
 
+        //GET REAL-TIME DATA FOR PARKING BAYS AROUND THE DESTINATION
         getData(realUrl);
 
 
@@ -242,18 +246,15 @@
             $("#recommendBtn").on("click",function(){
                 deleteMarkers();
                 getLocation();
-                map.setZoom(15);
+                map.setZoom(17);
+            });
+
+            $("#homepageBtn").on("click",function(){
+                window.location.href="/";
             });
         });
     }
-
-
-
-
 </script>
-
-
-
 <% include partials/footer %>
 
 
