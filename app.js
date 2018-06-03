@@ -8,7 +8,7 @@ var express         = require("express");
 var bodyParser      = require("body-parser");
 var mongoose        = require("mongoose");
 var Bay             = require("./models/bay");
-// var lastWeekData    = require("./test");  //updates of history statistical data
+//var lastWeekData    = require("./test");  //updates of history statistical data
 var https           = require("https");
 var app             = express();
 mongoose.connect("mongodb://localhost/parking");
