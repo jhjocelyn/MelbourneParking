@@ -24,10 +24,11 @@ function Bay(id) {
 
 // CONNECT TO SQL SERVER
 var connection = mysql.createConnection({
-    host: '52.255.40.58',
-    user: 'xingpingd',
-    password: 'xingpingd',
-    port: '3306',
+    // this database is private...
+    host: '',
+    user: '',
+    password: "",
+    port: '',
     database: 'Parking'
 });
 
