@@ -26,13 +26,23 @@
 <script type="text/javascript">
 // VARIABLES/DATA NEEDED FOR THIS PAGE
 var streetMarker = '<%=streetMarker%>';
-var mon = <%= days[0] %>;
-var tue = <%= days[1] %>;
-var wed = <%= days[2] %>;
-var thu = <%= days[3] %>;
-var fri = <%= days[4] %>;
-var sat = <%= days[5] %>;
-var sun = <%= days[6] %>;
+
+//Default: from 3rd party database
+// AJAX FOR HISTORY DATA
+    $.ajax({
+        url: "http://115.146.95.41:8000/parkdata/lastweekdata?bayId="+'<%= bayId %>',
+        type:"GET"
+    }).done(function(data){
+        var mon = data.prob[0];
+        var tue = data.prob[1];
+        var wed = data.prob[2];
+        var thr = data.prob[3];
+        var fri = data.prob[4];
+        var sat = data.prob[5];
+        var sun = data.prob[6];
+        lastweekChart(mon,tue,wed,thu,fri,sat,sun);
+    });
+
 var myurl = "http://115.146.95.41:8000/parkdata/predict?streetMarker="+'<%=streetMarker%>';
 
 var chartColors = {
@@ -49,7 +59,8 @@ var chartColors = {
 var ctx = $("#myChart")[0].getContext('2d');
 var predict = $("#preChart")[0].getContext('2d');
 
-var myChart = new Chart(ctx, {
+function lastweekChart(mon,tue,wed,thu,fri,sat,sun){
+    var myChart = new Chart(ctx, {
     type: 'bar',
     data: {
         labels: ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday","Sunday"],
@@ -87,7 +98,7 @@ var myChart = new Chart(ctx, {
         }
     }
 });
-
+}
 //AJAX - REQUEST ON PREDICTED DATA
 $.ajax({
     url: myurl,

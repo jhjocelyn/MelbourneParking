@@ -6,12 +6,10 @@
 
 var express         = require("express");
 var bodyParser      = require("body-parser");
-var mongoose        = require("mongoose");
 var Bay             = require("./models/bay");
-//var lastWeekData    = require("./test");  //updates of history statistical data
 var https           = require("https");
 var app             = express();
-mongoose.connect("mongodb://localhost/parking");
+
 
 app.use(bodyParser.urlencoded({extended:true}));
 app.use(express.static(__dirname +'/public'));
@@ -35,12 +33,10 @@ app.get("/parking",function(req,res){
 
 //SHOW --- DATA VISUALIZATION
 app.get("/data/:id",function(req,res){
+    //default: fetch data from the 3rd party database
     var streetMarker = req.query.streetMarker;
     var id = req.params.id;
-    Bay.findOne({"bayId":id},'prob',function(err,bay){
-        if (err) return handleError(err);
-        res.render("data",{days:bay.prob,streetMarker:streetMarker});
-    });
+    res.render("data",{bayId:id,streetMarker:streetMarker});
 });
 
 //START LOCAL SEVER
